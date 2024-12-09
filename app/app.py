@@ -162,7 +162,6 @@ def register_routes(app, db):
 
             # Update the item in the database
             db.items.update_one({"_id": ObjectId(item_id)}, {"$set": updated_data})
-            flash("Item updated successfully!", "success")
             return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
 
         return render_template("edit-item.html", item=item, wishlist_id=wishlist_id)
