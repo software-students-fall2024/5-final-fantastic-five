@@ -9,6 +9,7 @@ from bson import ObjectId
 import pytest
 from app.app import create_app
 
+load_dotenv()
 
 @pytest.fixture
 def app_fixture():
