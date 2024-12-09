@@ -24,6 +24,10 @@ jobs:
     - name: Install dependencies
       run: pipenv install --dev
 
+    - name: Start Docker Compose
+      run: docker-compose up -d mongodb
+      # This ensures the MongoDB container is running for your tests
+
     - name: Set Environment Variables
       env:
         MONGO_URI: "mongodb://localhost:27017/wishlist_db"

@@ -10,11 +10,8 @@ from bson import ObjectId
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, url_for
 
-# Check the environment and load the appropriate .env file
-if os.getenv('FLASK_ENV') == 'production':
-    load_dotenv('.env.production')
-else:
-    load_dotenv('.env')  # Default to .env for development
+
+load_dotenv() 
 
 
 def create_app():

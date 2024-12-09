@@ -19,11 +19,17 @@ jobs:
     - name: Build Docker image
       run: docker build -t arm9129/db:latest ./db
 
-    - name: Test MongoDB Image
+    - name: Start MongoDB Container for Testing
       run: |
         docker run --name test-mongo -d arm9129/db:latest
-        sleep 10
-        docker logs test-mongo
+        sleep 10  # Give MongoDB time to initialize
+
+    - name: Run MongoDB Tests
+      run: |
+        docker exec test-mongo mongo --eval "db.runCommand({ connectionStatus: 1 })"
+
+    - name: Stop and Remove MongoDB Container
+      run: |
         docker stop test-mongo
         docker rm test-mongo
 
