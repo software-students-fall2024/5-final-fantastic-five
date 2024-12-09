@@ -39,7 +39,7 @@ jobs:
 
     - name: Run tests
       env:
-        MONGO_URI: "mongodb://mongodb:27017/wishlist_db"
+        MONGO_URI: ${{ secrets.MONGO_URI }}
         FLASK_ENV: "testing"
         SECRET_KEY: "test-secret-key"
       run: pipenv run pytest tests
