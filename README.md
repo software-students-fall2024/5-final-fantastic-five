@@ -1,7 +1,7 @@
 # Final Project: Wish List Tracker App
 
-![Flask API CI/CD Badge]()
-![MongoDB CI/CD Badge]()
+![Flask API CI/CD Badge](https://github.com/software-students-fall2024/5-final-fantastic-five/actions/workflows/flask-api.yml)
+![MongoDB CI/CD Badge](https://github.com/software-students-fall2024/5-final-fantastic-five/actions/workflows/mongodb.yml)
 
 ## Table of Contents
 - [Project Description](#project-description)
@@ -192,9 +192,8 @@ Each subsystem includes unit tests to ensure functionality.
     - [Flask API Image](https://hub.docker.com/r/arm9129/flask-api)
   - [MongoDB Image](https://hub.docker.com/r/arm9129/db)
   - [Database Seeder Image](https://hub.docker.com/r/arm9129/db-seeder)
-- [Digital Ocean Deployment](#)
-  - [Subsystem 1 Deployment](#)
-  - [Subsystem 2 Deployment](#)
+- [Digital Ocean Deployment](wishlist-app-lrc7l.ondigitalocean.app)
+
 
 ---
 

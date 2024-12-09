@@ -7,43 +7,75 @@
     <button class="back-button" onclick="history.back()">Back</button>
 </div>
 
-<section>
-    <h3>Wishlist: {{ wishlist['name'] }}</h3>
-    {% for item in items %}
-        <div class="wishlist-item" {% if item.purchased %} style="background-color: #eaffea;" {% endif %}>
-            <h4>{{ item.name }}</h4>
-            <p><strong>Price:</strong> ${{ item.price }}</p>
-            <p><strong>Link:</strong> <a href="{{ item.link }}" target="_blank">View Item</a></p>
-            
-            {% if item.notes %}
-                <p><strong>Notes:</strong> {{ item.notes }}</p>
-            {% endif %}
-            
-            {% if item.photo_url %}
-                <div>
-                    <img src="{{ item.photo_url }}" alt="Item Photo" style="max-width: 150px; border: 1px solid #ccc; padding: 5px;">
+<section class="wishlist-grid-container">
+    <h2>{{ wishlist['name'] }}</h2>
+    <div class="wishlist-grid">
+        {% for item in items %}
+        <div class="wishlist-item" data-url="{{ url_for('wishlist_item_view', wishlist_id=wishlist._id, item_id=item._id) }}" onclick="redirectToUrl(this)">
+            <div class="item-photo">
+                {% if item.photo_url %}
+                <img src="{{ item.photo_url }}" alt="{{ item.name }}">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/default.png') }}" alt="Default Item Photo">
+                {% endif %}
+            </div>
+            <div class="item-info">
+                <h4>{{ item.name }}</h4>
+                <p class="item-price">${{ item.price }}</p>
+            </div>
+            <div class="item-actions">
+                <div class="action-menu">
+                    <button class="dots-menu" data-menu-id="menu-{{ item._id | string }}" onclick="toggleMenu(event, this)">&#x22EE;</button>
+                    <div class="dropdown-menu" id="menu-{{ item._id | string }}">
+                        <a href="{{ url_for('edit_item', wishlist_id=wishlist._id, item_id=item._id) }}">Edit</a>
+                        <form action="{{ url_for('delete_item', wishlist_id=wishlist._id, item_id=item._id) }}" method="POST">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </div>
                 </div>
-            {% endif %}
-            
-            <a href="{{ url_for('edit_item', wishlist_id=wishlist['_id'], item_id=item['_id']) }}" class="button">Edit</a>
+            </div>
         </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
 
-    <a href="{{ url_for('add_item', wishlist_id=wishlist['_id']) }}" class="button">Add Item</a>
-    <button class="button" onclick="copyWishlistLink('{{ wishlist.public_id }}')">Copy Wishlist Link</button>
-
-    <script>
-        function copyWishlistLink(publicId) {
-            const baseUrl = window.location.origin;
-            const link = `${baseUrl}/view/${publicId}`;
-
-            // Copy link to clipboard
-            navigator.clipboard.writeText(link).then(() => {
-                alert('Wishlist link copied to clipboard: ' + link);
-            }).catch(err => {
-                console.error('Failed to copy link: ', err);
-            });
-        }
-    </script>
+    <div class="wishlist-actions">
+        <a href="{{ url_for('add_item', wishlist_id=wishlist['_id']) }}" class="button">Add Item</a>
+        <button class="button" onclick="copyWishlistLink('{{ wishlist.public_id }}')">Copy Wishlist Link</button>
+    </div>
 </section>
+
+<script>
+    function redirectToUrl(element) {
+        const url = element.getAttribute('data-url');
+        window.location.href = url;
+    }
+
+    function toggleMenu(event, button) {
+        event.stopPropagation(); // Prevent parent div's click event
+        const menuId = button.getAttribute('data-menu-id');
+        const menu = document.getElementById(menuId);
+        
+        if (menu) {
+            menu.classList.toggle('show');
+        }
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    });
+
+    // Copy wishlist link
+    function copyWishlistLink(publicId) {
+        const baseUrl = window.location.origin;
+        const link = `${baseUrl}/view/${publicId}`;
+        navigator.clipboard.writeText(link).then(() => {
+            alert('Wishlist link copied to clipboard: ' + link);
+        }).catch(err => {
+            console.error('Failed to copy link: ', err);
+        });
+    }
+</script>
 {% endblock %}
