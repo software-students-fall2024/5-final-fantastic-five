@@ -38,6 +38,10 @@ jobs:
       run: pipenv run black app/
 
     - name: Run tests
+      env:
+        MONGO_URI: "mongodb+srv://arm9129:secretSanta@wishlist-cluster.pkxwk.mongodb.net/?retryWrites=true&w=majority&appName=wishlist-cluster"
+        FLASK_ENV: "testing"
+        SECRET_KEY: "test-secret-key"
       run: pipenv run pytest tests
 
     # - name: Run tests
