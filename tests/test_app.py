@@ -43,13 +43,13 @@ def mock_user_data():
     """Return mock user data."""
     return {"username": "test_user", "password": "test_pass"}
 
-
 def test_home_page(client):  # pylint: disable=redefined-outer-name
     """Test the home page"""
     response = client.get("/")
     assert response.status_code == 200
-    assert b'<a href="./login">Log in</a>' in response.data
-    assert b'<a href="./signup">Sign up</a>' in response.data
+    assert b"<h2>Welcome to Wishlist!</h2>" in response.data
+    assert b"Create, view, and share your wishlists effortlessly." in response.data
+
 
 def test_login(client, app_fixture):  # pylint: disable=redefined-outer-name
     """Test the login page"""

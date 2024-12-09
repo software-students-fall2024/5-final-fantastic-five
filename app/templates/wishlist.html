@@ -3,37 +3,34 @@
 {% block title %}{{ wishlist['name'] }}{% endblock %}
 
 {% block content %}
+<div class="back-button-container"></div>
+    <button class="back-button" onclick="history.back()">Back</button>
+</div>
 <section>
-    <h3>Wishlist</h3>
-    <p> {{ wishlist['name'] }}</p>
+    <h3>Wishlist: {{ wishlist['name'] }}</h3>
     {% for item in items %}
         <div {% if item.purchased %} style="background-color: #eaffea;" {% endif %}>
             <p>{{ item.name }} - {% if item['purchased'] %}Purchased{% else %}Not Purchased{% endif %}</p>
         </div>
         <p>
-            <a href="{{ item['link'] }}">{{ item['name'] }}</a>
+            <a href="{{ item['link'] }}" target="_blank">{{ item['name'] }}</a>
             ${{ item['price'] }}
         </p>
-        
     {% endfor %}
-    <a href="{{ url_for('add_item', wishlist_id=wishlist['_id']) }}">Add Item</button>
-    <button type="button">Browse recommended items</button>
-    <button onclick="exportWishlist('{{ wishlist.public_id }}')">Export Wishlist</button>
-    <input id="export-link-{{ wishlist.public_id }}" type="text" readonly style="width: 300px; margin-left: 10px;"/>
+    <a href="{{ url_for('add_item', wishlist_id=wishlist['_id']) }}" class="button">Add Item</a>
+    <button class="button" onclick="copyWishlistLink('{{ wishlist.public_id }}')">Copy Wishlist Link</button>
 
     <script>
-        function exportWishlist(publicId) {
+        function copyWishlistLink(publicId) {
             const baseUrl = window.location.origin;
             const link = `${baseUrl}/view/${publicId}`;
 
-            const inputField = document.getElementById(`export-link-${publicId}`);
-            inputField.value = link;
-
-            inputField.select();
-            inputField.setSelectionRange(0, 99999);  // For mobile devices
-            document.execCommand('copy');
-
-            alert('Wishlist link copied to clipboard: ' + link);
+            // Copy link to clipboard
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Wishlist link copied to clipboard: ' + link);
+            }).catch(err => {
+                console.error('Failed to copy link: ', err);
+            });
         }
     </script>
 </section>
