@@ -7,49 +7,72 @@
     <button class="back-button" onclick="history.back()">Back</button>
 </div>
 
-<section>
-    <h3>Wishlist: {{ wishlist['name'] }}</h3>
+<section class="wishlist-grid-container">
+    <h2>Wishlist: {{ wishlist['name'] }}</h2>
     <div class="wishlist-grid">
         {% for item in items %}
-        <div class="wishlist-item {% if item.purchased %}purchased{% endif %}">
+        <div class="wishlist-item" data-url="{{ url_for('wishlist_item_view', wishlist_id=wishlist._id, item_id=item._id) }}" onclick="redirectToUrl(this)">
             <div class="item-photo">
                 {% if item.photo_url %}
-                <img src="{{ item.photo_url }}" alt="Item Photo">
+                <img src="{{ item.photo_url }}" alt="{{ item.name }}">
                 {% else %}
                 <img src="{{ url_for('static', filename='images/default.png') }}" alt="Default Item Photo">
                 {% endif %}
             </div>
-            <div class="item-details">
+            <div class="item-info">
                 <h4>{{ item.name }}</h4>
-                <p><strong>Price:</strong> ${{ item.price }}</p>
-                <p><strong>Link:</strong> <a href="{{ item.link }}" target="_blank">View Item</a></p>
-                {% if item.notes %}
-                <p class="item-notes">{{ item.notes }}</p>
-                {% endif %}
+                <p class="item-price">${{ item.price }}</p>
             </div>
             <div class="item-actions">
-                <a href="{{ url_for('edit_item', wishlist_id=wishlist['_id'], item_id=item['_id']) }}" class="button">Edit</a>
+                <div class="action-menu">
+                    <button class="dots-menu" data-menu-id="menu-{{ item['_id'] }}">&#x22EE;</button>
+                    <div class="dropdown-menu" id="menu-{{ item['_id'] }}">
+                        <a href="{{ url_for('edit_item', wishlist_id=wishlist['_id'], item_id=item['_id']) }}">Edit</a>
+                        <form action="{{ url_for('delete_item', wishlist_id=wishlist['_id'], item_id=item['_id']) }}" method="POST">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
         {% endfor %}
     </div>
-    <div class="actions">
+
+    <div class="wishlist-actions">
         <a href="{{ url_for('add_item', wishlist_id=wishlist['_id']) }}" class="button">Add Item</a>
         <button class="button" onclick="copyWishlistLink('{{ wishlist.public_id }}')">Copy Wishlist Link</button>
     </div>
 </section>
 
 <script>
+    // Add click event listeners to toggle menu buttons
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.dots-menu').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent triggering the parent div's click
+                const menuId = event.target.dataset.menuId;
+                const menu = document.getElementById(menuId);
+                if (menu) {
+                    menu.classList.toggle('show');
+                }
+            });
+        });
+    });
+
+    // Copy wishlist link
     function copyWishlistLink(publicId) {
         const baseUrl = window.location.origin;
         const link = `${baseUrl}/view/${publicId}`;
-
-        // Copy link to clipboard
         navigator.clipboard.writeText(link).then(() => {
             alert('Wishlist link copied to clipboard: ' + link);
         }).catch(err => {
             console.error('Failed to copy link: ', err);
         });
+    }
+
+    function redirectToUrl(element) {
+        const url = element.getAttribute('data-url');
+        window.location.href = url;
     }
 </script>
 {% endblock %}

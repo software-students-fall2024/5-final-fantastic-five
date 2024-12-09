@@ -160,6 +160,28 @@ def register_routes(app, db):
 
         return render_template("add-item.html", id=wishlist_id)
 
+    @app.route("/wishlist/<wishlist_id>/item/<item_id>", methods=["GET"])
+    def wishlist_item_view(wishlist_id, item_id):
+        """
+        Route to view a specific wishlist item.
+
+        Args:
+            wishlist_id (str): ID of the wishlist.
+            item_id (str): ID of the item.
+
+        Returns:
+            Renders the item detail page.
+        """
+        # Fetch the wishlist and item details from the database
+        wishlist = db.lists.find_one({"_id": ObjectId(wishlist_id)})
+        item = db.items.find_one({"_id": ObjectId(item_id)})
+
+        if not wishlist or not item:
+            flash("Item or wishlist not found.", "error")
+            return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
+
+        return render_template("item-detail.html", item=item, wishlist=wishlist)
+
     @app.route("/wishlist/<wishlist_id>/edit_item/<item_id>", methods=["GET", "POST"])
     @login_required
     def edit_item(wishlist_id, item_id):
@@ -210,6 +232,31 @@ def register_routes(app, db):
             return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
 
         return render_template("edit-item.html", item=item, wishlist_id=wishlist_id)
+
+    @app.route("/wishlist/<wishlist_id>/item/<item_id>/delete", methods=["POST"])
+    def delete_item(wishlist_id, item_id):
+        """
+        Route to delete a specific wishlist item.
+
+        Args:
+            wishlist_id (str): ID of the wishlist.
+            item_id (str): ID of the item.
+
+        Returns:
+            Redirects to the wishlist view.
+        """
+        # Delete the item from the database
+        db.items.delete_one({"_id": ObjectId(item_id)})
+
+        # Optionally update the wishlist items list
+        db.lists.update_one(
+            {"_id": ObjectId(wishlist_id)},
+            {"$pull": {"items": {"_id": ObjectId(item_id)}}}
+        )
+
+        flash("Item deleted successfully.", "success")
+        return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
+
 
     @app.route("/view/<public_id>")
     def public_view(public_id):
