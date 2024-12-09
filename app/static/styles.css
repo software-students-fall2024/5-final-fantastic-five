@@ -157,6 +157,89 @@ button:hover {
     margin: 5px 0;
 }
 
+/* Grid layout for wishlist items */
+.wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+/* Individual wishlist item card */
+.wishlist-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    padding: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.wishlist-item:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Photo in wishlist item */
+.wishlist-item .item-photo img {
+    width: 100%;
+    height: auto;
+    max-height: 150px;
+    object-fit: cover;
+    border-bottom: 1px solid #ddd;
+    display: block;
+}
+
+/* Item details */
+.wishlist-item .item-details {
+    padding: 0.5rem 0;
+}
+
+.wishlist-item .item-details h4 {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.wishlist-item .item-details p {
+    margin: 0.2rem 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Notes */
+.item-notes {
+    font-style: italic;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+/* Action buttons */
+.item-actions .button {
+    display: inline-block;
+    margin: 0.5rem 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    background: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.item-actions .button:hover {
+    background: #0056b3;
+}
+
+/* Purchased items highlight */
+.purchased {
+    background: #eaffea;
+}
+
+
+
 .error {
     color: red;
 }
