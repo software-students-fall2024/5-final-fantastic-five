@@ -11,7 +11,15 @@
     <h2>{{ wishlist['name'] }}</h2>
     <div class="wishlist-grid">
         {% for item in items %}
-        <div class="wishlist-item" data-url="{{ url_for('wishlist_item_view', wishlist_id=wishlist._id, item_id=item._id) }}" onclick="redirectToUrl(this)">
+        <div class="wishlist-item" 
+             data-photo="{{ item.photo_url if item.photo_url else url_for('static', filename='images/default.png') }}"
+             data-name="{{ item.name }}" 
+             data-price="{{ item.price }}" 
+             data-link="{{ item.link if item.link else '#' }}" 
+             data-notes="{{ item.notes if item.notes else '' }}"
+             data-edit-url="{{ url_for('edit_item', wishlist_id=wishlist._id, item_id=item._id) }}"
+             data-delete-url="{{ url_for('delete_item', wishlist_id=wishlist._id, item_id=item._id) }}"        
+             onclick="openModal(this)">
             <div class="item-photo">
                 {% if item.photo_url %}
                 <img src="{{ item.photo_url }}" alt="{{ item.name }}">
@@ -23,17 +31,6 @@
                 <h4>{{ item.name }}</h4>
                 <p class="item-price">${{ item.price }}</p>
             </div>
-            <div class="item-actions">
-                <div class="action-menu">
-                    <button class="dots-menu" data-menu-id="menu-{{ item._id | string }}" onclick="toggleMenu(event, this)">&#x22EE;</button>
-                    <div class="dropdown-menu" id="menu-{{ item._id | string }}">
-                        <a href="{{ url_for('edit_item', wishlist_id=wishlist._id, item_id=item._id) }}">Edit</a>
-                        <form action="{{ url_for('delete_item', wishlist_id=wishlist._id, item_id=item._id) }}" method="POST">
-                            <button type="submit">Delete</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
         </div>
         {% endfor %}
     </div>
@@ -44,11 +41,94 @@
     </div>
 </section>
 
+<!-- Modal for Item Preview -->
+<div id="itemModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="action-menu">
+                <button class="dots-menu" data-menu-id="modal-menu" onclick="toggleMenu(event, this)">&#x22EE;</button>
+                <div class="dropdown-menu" id="modal-menu">
+                    <a id="editItemLink" href="#">Edit</a>
+                    <form id="deleteItemForm" method="POST">
+                        <button type="submit">Delete</button>
+                    </form>
+                </div>                
+            </div>
+            <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="modal-image">
+                <img id="modalImage" src="" alt="Item Image">
+            </div>
+            <div class="modal-details">
+                <h2 id="modalName"></h2>
+                <p id="modalPrice"></p>
+                <a id="modalLink" href="#" target="_blank">View Item</a>
+                <p id="modalNotes"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
     function redirectToUrl(element) {
         const url = element.getAttribute('data-url');
         window.location.href = url;
     }
+
+
+    function openModal(element) {
+        const photoUrl = element.getAttribute("data-photo");
+        const name = element.getAttribute("data-name");
+        const price = element.getAttribute("data-price");
+        const link = element.getAttribute("data-link");
+        const notes = element.getAttribute("data-notes");
+        const editUrl = element.getAttribute("data-edit-url");
+        const deleteUrl = element.getAttribute("data-delete-url");
+
+        // Populate modal content
+        document.getElementById("modalImage").src = photoUrl;
+        document.getElementById("modalName").textContent = name;
+        document.getElementById("modalPrice").textContent = price ? `$${price}` : 'Price not available';
+        const modalLink = document.getElementById("modalLink");
+        modalLink.href = link;
+        modalLink.textContent = link !== "#" ? "View Item" : "";
+        document.getElementById("modalNotes").textContent = notes;
+
+        // Update dropdown menu links
+        const editItemLink = document.getElementById("editItemLink");
+        editItemLink.href = editUrl;
+
+        const deleteItemForm = document.getElementById("deleteItemForm");
+        deleteItemForm.action = deleteUrl;
+
+        // Show the modal
+        const modal = document.getElementById("itemModal");
+        modal.style.display = "block";
+        document.body.style.overflow = "hidden"; // Prevent background scrolling
+
+        // Close modal when clicking outside
+        modal.addEventListener("click", closeOnOutsideClick);
+    }
+
+    function closeModal() {
+        const modal = document.getElementById("itemModal");
+        modal.style.display = "none";
+        document.body.style.overflow = "auto"; // Re-enable background scrolling
+
+        // Remove outside click listener
+        modal.removeEventListener("click", closeOnOutsideClick);
+    }
+
+
+    function closeOnOutsideClick(event) {
+        const modalContent = document.querySelector(".modal-content");
+        if (!modalContent.contains(event.target)) {
+            closeModal();
+        }
+    }
+
 
     function toggleMenu(event, button) {
         event.stopPropagation(); // Prevent parent element's click event
@@ -65,23 +145,20 @@
 
             // Toggle the clicked menu
             menu.classList.toggle("show");
+
+            // Add mouseleave event to hide menu
+            menu.addEventListener("mouseleave", () => {
+                menu.classList.remove("show");
+            });
         }
     }
 
-    // Close the menu if clicking outside
+    // Close all menus if clicking outside
     document.addEventListener("click", () => {
         document.querySelectorAll(".dropdown-menu").forEach((menu) => {
             menu.classList.remove("show");
         });
     });
-
-    // Optional: Add hover-out behavior to require a re-click
-    document.querySelectorAll(".dropdown-menu").forEach((menu) => {
-        menu.addEventListener("mouseleave", () => {
-            menu.classList.remove("show");
-        });
-    });
-
 
     // Copy wishlist link
     function copyWishlistLink(publicId) {
@@ -93,5 +170,6 @@
             console.error('Failed to copy link: ', err);
         });
     }
+
 </script>
 {% endblock %}
