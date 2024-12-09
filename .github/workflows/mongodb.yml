@@ -17,7 +17,15 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Build Docker image
-      run: docker build -t arm9129/db ./db
+      run: docker build -t arm9129/db:latest ./db
+
+    - name: Test MongoDB Image
+      run: |
+        docker run --name test-mongo -d arm9129/db:latest
+        sleep 10
+        docker logs test-mongo
+        docker stop test-mongo
+        docker rm test-mongo
 
     - name: Push Docker image to Docker Hub
       env:
@@ -25,4 +33,4 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        docker push arm9129/db
+        docker push arm9129/db:latest

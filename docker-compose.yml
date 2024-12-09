@@ -7,8 +7,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      - MONGO_URI=mongodb://mongodb:27017/wishlist_db
+    env_file:
+      - .env
     depends_on:
       - mongodb
 
@@ -26,8 +26,8 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - mongodb
-    environment:
-      - MONGO_URI=mongodb:27017
+    env_file:
+      - .env
     command: ["python3", "/seed.py"]
 
 volumes:

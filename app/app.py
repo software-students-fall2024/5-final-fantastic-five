@@ -180,4 +180,4 @@ def register_routes(app, db):
 
 if __name__ == "__main__":
     APP = create_app()
-    APP.run(host="0.0.0.0", port=5000)
+    APP.run(host="0.0.0.0", port=3000)
