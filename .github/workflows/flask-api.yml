@@ -39,7 +39,7 @@ jobs:
 
     - name: Run tests
       env:
-        MONGO_URI: "mongodb+srv://arm9129:secretSanta@wishlist-cluster.pkxwk.mongodb.net/?retryWrites=true&w=majority&appName=wishlist-cluster"
+        MONGO_URI: "mongodb://mongodb:27017/wishlist_db"
         FLASK_ENV: "testing"
         SECRET_KEY: "test-secret-key"
       run: pipenv run pytest tests
