@@ -4,19 +4,24 @@
 
 {% block content %}
 <section>
-    <form action="{{ url_for('add_item', wishlist_id=id) }}" method="POST">
-        <h2>Add New Item:</h2>
-        <br>
-        <label for="link" class="text">Link</label>
-        <input type="text" name="link" id="link">
-        <br>
-        <label for="name" class="text">Name</label>
-        <input type="text" name="name" id="name">
-        <br>
-        <label for="price" class="text">Price</label>
-        <input type="text" name="price" id="price">
-        <br>
-        <button type="submit" class="button">Submit</button>
-    </form>    
+    <form action="{{ url_for('add_item', wishlist_id=wishlist_id) }}" method="POST" enctype="multipart/form-data">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+    
+        <label for="price">Price:</label>
+        <input type="text" id="price" name="price" required>
+    
+        <label for="link">Link:</label>
+        <input type="url" id="link" name="link">
+    
+        <label for="notes">Notes (optional):</label>
+        <textarea id="notes" name="notes"></textarea>
+    
+        <label for="photo">Photo (optional):</label>
+        <input type="file" id="photo" name="photo" accept="image/*">
+    
+        <button type="submit">Add Item</button>
+    </form>
+    
 </section>
 {% endblock %}

@@ -44,6 +44,8 @@ def create_app():
 def register_routes(app, db):
     """Register routes"""
 
+    register_user_routes(app, db)
+
     def login_required(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -135,20 +137,99 @@ def register_routes(app, db):
             Redirects to the wishlist page after adding an item or renders the add item page.
         """
         if request.method == "POST":
-            wishlist_items = db.lists.find_one({"_id": ObjectId(wishlist_id)})["items"]
             new_item = {
                 "wishlist": ObjectId(wishlist_id),
                 "link": request.form["link"],
                 "name": request.form["name"],
                 "price": request.form["price"],
+                "notes": request.form.get("notes", ""),  # Optional field
+                "photo_url": "/static/uploads/default.jpg",  # Default image
             }
-            wishlist_items.append(new_item)
-            db.lists.update_one(
-                {"_id": ObjectId(wishlist_id)}, {"$set": {"items": wishlist_items}}
-            )
+
+            # Handle photo upload if present
+            if "photo" in request.files and request.files["photo"].filename != "":
+                photo = request.files["photo"]
+                photo_filename = f"{uuid.uuid4()}.jpg"  # Use a unique name
+                photo_path = os.path.join("static/uploads", photo_filename)
+                photo.save(photo_path)
+                new_item["photo_url"] = f"/{photo_path}"
+
+            # Insert the new item into the database
             db.items.insert_one(new_item)
             return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
+
         return render_template("add-item.html", id=wishlist_id)
+
+    @app.route("/wishlist/<wishlist_id>/edit_item/<item_id>", methods=["GET", "POST"])
+    @login_required
+    def edit_item(wishlist_id, item_id):
+        """
+        Route to edit an item in a specific wishlist.
+
+        Args:
+            wishlist_id (str): ID of the wishlist.
+            item_id (str): ID of the item.
+
+        Returns:
+            Renders the edit item page or redirects to the wishlist view.
+        """
+        # Verify wishlist ownership
+        wishlist = db.lists.find_one({"_id": ObjectId(wishlist_id)})
+        if not wishlist or wishlist["username"] != session.get("username"):
+            flash("Access denied. You cannot edit items in this wishlist.", "error")
+            return redirect(url_for("home"))
+
+        if request.method == "POST":
+            updated_data = {
+                "name": request.form["name"],
+                "price": request.form["price"],
+                "link": request.form["link"],
+                "notes": request.form.get("notes", ""),  # Optional field
+            }
+
+            # Handle photo upload if present
+            if "photo" in request.files and request.files["photo"].filename != "":
+                photo = request.files["photo"]
+                photo_filename = f"{item_id}.jpg"  # Save using item ID for uniqueness
+                photo_path = os.path.join("static/uploads", photo_filename)
+                photo.save(photo_path)
+                updated_data["photo_url"] = f"/{photo_path}"
+            else:
+                # Use default image if no photo is uploaded
+                updated_data.setdefault("photo_url", "/static/uploads/default.png")
+
+            # Update the item in the database
+            db.items.update_one({"_id": ObjectId(item_id)}, {"$set": updated_data})
+            flash("Item updated successfully!", "success")
+            return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
+
+        # Fetch the existing item details for editing
+        item = db.items.find_one({"_id": ObjectId(item_id)})
+        if not item:
+            flash("Item not found.", "error")
+            return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
+
+        return render_template("edit-item.html", item=item, wishlist_id=wishlist_id)
+
+    @app.route("/view/<public_id>")
+    def public_view(public_id):
+        """
+        Public view to show a shared wishlist.
+        """
+        wishlist = db.lists.find_one({"public_id": public_id})
+        if not wishlist:
+            return "Wishlist not found", 404
+        items = db.items.find({"wishlist": wishlist["_id"]})
+        return render_template("public_wishlist.html", wishlist=wishlist, items=items)
+
+    @app.route("/view/mark_purchased/<item_id>", methods=["POST"])
+    def mark_as_purchased(item_id):
+        db.items.update_one({"_id": ObjectId(item_id)}, {"$set": {"purchased": True}})
+        return "Item marked as purchased", 200
+
+
+def register_user_routes(app, db):
+    """Register user-related routes."""
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -219,22 +300,6 @@ def register_routes(app, db):
         session.pop("username", None)
         flash("You have been logged out.", "info")
         return redirect(url_for("home"))
-
-    @app.route("/view/<public_id>")
-    def public_view(public_id):
-        """
-        Public view to show a shared wishlist.
-        """
-        wishlist = db.lists.find_one({"public_id": public_id})
-        if not wishlist:
-            return "Wishlist not found", 404
-        items = db.items.find({"wishlist": wishlist["_id"]})
-        return render_template("public_wishlist.html", wishlist=wishlist, items=items)
-
-    @app.route("/view/mark_purchased/<item_id>", methods=["POST"])
-    def mark_as_purchased(item_id):
-        db.items.update_one({"_id": ObjectId(item_id)}, {"$set": {"purchased": True}})
-        return "Item marked as purchased", 200
 
 
 APP = create_app()
