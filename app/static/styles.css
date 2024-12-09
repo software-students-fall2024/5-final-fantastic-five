@@ -80,6 +80,8 @@ form label {
 
 form input[type="text"],
 form input[type="password"],
+form input[type="url"],
+form input[type="notes"],
 form button {
     width: 100%;
     padding: 10px;
@@ -152,7 +154,7 @@ button:hover {
 }
 
 .wishlist-item {
-    position: relative;
+    /* position: relative; */
     background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -164,7 +166,7 @@ button:hover {
 }
 
 .wishlist-item:hover {
-    transform: scale(1.03);
+    transform: scale(1.001);
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -229,7 +231,7 @@ button:hover {
     border: 1px solid #ddd;
     border-radius: 4px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 999;
+    z-index: 999999;
     text-align: left;
     padding: 10px;
 }
