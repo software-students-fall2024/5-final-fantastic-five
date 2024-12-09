@@ -140,59 +140,60 @@ button:hover {
 
 /* General Wishlist Styles */
 .wishlist-grid-container {
+    position: relative;
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
 
 .wishlist-grid {
-    position: relative;
-    overflow: visible; /* Prevent clipping by the grid container */
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-auto-rows: auto; /* Allow rows to adjust based on content height */
+    grid-auto-flow: dense; /* Pack items tightly */
+    gap: 20px; /* Add spacing between items */
 }
 
 .wishlist-item {
-    /* position: relative; */
+    display: inline-block;
+    position: relative;
     background: white;
-    border: 1px solid #ddd;
+    /* border: 1px solid #ddd; */
     border-radius: 8px;
-    text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 15px;
     transition: transform 0.2s;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .wishlist-item:hover {
+    position: relative;
     transform: scale(1.001);
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
 .item-photo img {
+    display: block;
     width: 100%;
-    height: auto;
-    /* max-height: 180px; */
-    object-fit: cover;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 3px;
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 8px; /* Optional */
 }
 
+
 .item-info {
+    text-align: center;
     position: relative;
-    padding-bottom: 30px; /* Add space for the dots menu */
 }
 
 .item-info h4 {
     font-size: 1.2rem;
-    margin-bottom: 2px;
+    margin: 2px;
 }
 
 .item-price {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #666;
-    margin-bottom: 2px;
+    margin: 2px;
 }
 
 /* Action Buttons */
@@ -231,7 +232,7 @@ button:hover {
     border: 1px solid #ddd;
     border-radius: 4px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 999999;
+    /* z-index: 99999; */
     text-align: left;
     padding: 10px;
 }
@@ -319,7 +320,7 @@ button:hover {
 img {
     max-width: 100%;
     height: auto;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
     margin-bottom: 10px;
 }
 
@@ -336,6 +337,104 @@ input[type="file"] {
 main {
     margin: 3%
 }
+
+/* Modal Background */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(255, 255, 255, 0.8); /* Light white overlay */
+}
+
+/* Modal Content */
+.modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    max-width: 700px;
+    width: 90%; /* Responsive width */
+    text-align: left;
+}
+
+/* Modal Header */
+.modal-header {
+    position: absolute; /* Position the header over the modal body */
+    top: 0;
+    right: 0;
+    width: 100%; /* Full width to align items to the right */
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px; /* Add some padding for spacing */
+    z-index: 100; /* Ensure the header stays on top of other modal content */
+}
+
+.modal-header .dots-menu {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.modal-header .close {
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 10px; /* Add spacing between the close button and dots menu */
+}
+
+/* Modal Body */
+.modal-body {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+/* Modal Image */
+.modal-image {
+    max-width: 50%;
+    border-radius: 10px;
+}
+
+/* Modal Details */
+.modal-details {
+    flex: 1;
+    text-align: center;
+}
+
+.modal-details h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.modal-details p {
+    margin: 10px 0;
+}
+
+.modal-details a {
+    display: inline-block;
+    color: #007bff;
+    text-decoration: none;
+    margin-bottom: 10px;
+}
+
+.modal-details a:hover {
+    text-decoration: underline;
+}
+
+
+
 /* Footer */
 footer {
     text-align: center;
