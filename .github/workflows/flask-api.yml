@@ -24,13 +24,27 @@ jobs:
     - name: Install dependencies
       run: pipenv install --dev
 
+    - name: Set Environment Variables
+      env:
+        MONGO_URI: "mongodb://localhost:27017/wishlist_db"
+        FLASK_ENV: "testing"
+        SECRET_KEY: "test-secret-key"
+      run: echo "Environment variables set."
+
     - name: Run linting
       run: pipenv run pylint app/app.py
 
     - name: Format code with Black
       run: pipenv run black app/
 
+    # - name: Run tests
+    #   run: pipenv run pytest tests
+
     - name: Run tests
+      env:
+        MONGO_URI: "mongodb://localhost:27017/wishlist_db"
+        FLASK_ENV: "testing"
+        SECRET_KEY: "test-secret-key"
       run: pipenv run pytest tests
 
     - name: Build Docker image

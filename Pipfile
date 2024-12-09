@@ -25,6 +25,7 @@ pytest = "*"
 tomli = "*"
 typing_extensions = "*"
 exceptiongroup = "*"
+gunicorn = "*"
 
 [dev-packages]
 pytest = "*"

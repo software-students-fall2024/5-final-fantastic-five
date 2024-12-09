@@ -10,7 +10,11 @@ from bson import ObjectId
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, url_for
 
-load_dotenv()
+# Check the environment and load the appropriate .env file
+if os.getenv('FLASK_ENV') == 'production':
+    load_dotenv('.env.production')
+else:
+    load_dotenv('.env')  # Default to .env for development
 
 
 def create_app():
@@ -24,6 +28,7 @@ def create_app():
     # print(f"MONGO_DBNAME: {os.getenv('MONGO_DBNAME')}")
 
     mongo_uri = os.getenv("MONGO_URI")
+
     mongo_dbname = "wishlist"
 
     if not mongo_uri:
@@ -31,7 +36,7 @@ def create_app():
     if not mongo_dbname:
         raise ValueError("MONGO_DBNAME is not set in the environment variables.")
 
-    connection = pymongo.MongoClient(mongo_uri)
+    connection = pymongo.MongoClient(mongo_uri, tls=True)
     db = connection[mongo_dbname]
 
     register_routes(app, db)
@@ -178,6 +183,7 @@ def register_routes(app, db):
         return "Item marked as purchased", 200
 
 
+APP = create_app()
 if __name__ == "__main__":
-    APP = create_app()
-    APP.run(host="0.0.0.0", port=3000)
+    # APP.run(host="0.0.0.0", port=3000)
+    APP.run(debug=False, host="0.0.0.0", port=int(os.getenv("PORT", "3000")))

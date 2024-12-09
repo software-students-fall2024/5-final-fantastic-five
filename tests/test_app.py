@@ -8,7 +8,6 @@ from bson import ObjectId
 import pytest
 from app.app import create_app
 
-
 @pytest.fixture
 def app_fixture():
     """
@@ -17,7 +16,7 @@ def app_fixture():
     with patch.dict(
         os.environ,
         {
-            "MONGO_URI": "mongodb://localhost:27017/wishlist_db",
+            "MONGO_URI": "mongodb://mongodb:27017/wishlist_db",
             "MONGO_DBNAME": "wishlist",
         },
     ):
