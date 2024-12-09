@@ -45,6 +45,7 @@ def register_routes(app, db):
     """Register routes"""
 
     register_user_routes(app, db)
+    register_wishlist_routes(app, db)
 
     def login_required(f):
         @wraps(f)
@@ -62,68 +63,6 @@ def register_routes(app, db):
         Home route that renders the homepage.
         """
         return render_template("home.html")
-
-    @app.route("/<username>")
-    def profile(username):
-        """
-        Profile page for a user displaying their wishlists.
-
-        Args:
-            username (str): Username of the profile owner.
-
-        Returns:
-            Rendered HTML template for the profile page.
-        """
-        user_wishlists = list(db.lists.find({"username": username}))
-        return render_template(
-            "profile.html", username=username, wishlists=user_wishlists
-        )
-
-    @app.route("/<username>/add_wishlist", methods=["GET", "POST"])
-    @login_required
-    def add_wishlist(username):
-        """
-        Route to add a new wishlist for a user.
-
-        Args:
-            username (str): Username of the profile owner.
-
-        Returns:
-            Redirects to the profile page after adding a wishlist or renders the add wishlist page.
-        """
-        if session["username"] != username:
-            flash("Access denied. You cannot modify another user's wishlist.", "error")
-            return redirect(url_for("home"))
-
-        if request.method == "POST":
-            new_wishlist = {
-                "username": username,
-                "items": [],
-                "name": request.form["name"],
-                "public_id": str(uuid.uuid4()),  # Generate a unique public ID
-            }
-            db.lists.insert_one(new_wishlist)
-            return redirect(url_for("profile", username=username))
-
-        user_wishlists = list(db.lists.find({"username": username}))
-        return render_template(
-            "add-wishlist.html", username=username, wishlists=user_wishlists
-        )
-
-    @app.route("/wishlist/<wishlist_id>")
-    def wishlist_view(wishlist_id):
-        """
-        Route to display a specific wishlist with its items.
-
-        Args:
-            wishlist_id (str): ID of the wishlist.
-
-        Returns:
-            Rendered HTML template for the wishlist page.
-        """
-        user_wishlist = db.lists.find_one({"_id": ObjectId(wishlist_id)})
-        items = list(db.items.find({"wishlist": ObjectId(wishlist_id)}))
-        return render_template("wishlist.html", wishlist=user_wishlist, items=items)
 
     @app.route("/wishlist/<wishlist_id>/add_item", methods=["GET", "POST"])
     def add_item(wishlist_id):
@@ -217,7 +156,9 @@ def register_routes(app, db):
                 updated_data["photo_url"] = f"/{photo_path}"
             else:
                 # Retain the current photo_url if no new photo is uploaded
-                updated_data["photo_url"] = item.get("photo_url", "/static/uploads/default.png")
+                updated_data["photo_url"] = item.get(
+                    "photo_url", "/static/uploads/default.png"
+                )
 
             # Update the item in the database
             db.items.update_one({"_id": ObjectId(item_id)}, {"$set": updated_data})
@@ -244,23 +185,11 @@ def register_routes(app, db):
         # Optionally update the wishlist items list
         db.lists.update_one(
             {"_id": ObjectId(wishlist_id)},
-            {"$pull": {"items": {"_id": ObjectId(item_id)}}}
+            {"$pull": {"items": {"_id": ObjectId(item_id)}}},
         )
 
         flash("Item deleted successfully.", "success")
         return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
-
-
-    @app.route("/view/<public_id>")
-    def public_view(public_id):
-        """
-        Public view to show a shared wishlist.
-        """
-        wishlist = db.lists.find_one({"public_id": public_id})
-        if not wishlist:
-            return "Wishlist not found", 404
-        items = db.items.find({"wishlist": wishlist["_id"]})
-        return render_template("public_wishlist.html", wishlist=wishlist, items=items)
 
     @app.route("/view/mark_purchased/<item_id>", methods=["POST"])
     def mark_as_purchased(item_id):
@@ -340,6 +269,64 @@ def register_user_routes(app, db):
         session.pop("username", None)
         flash("You have been logged out.", "info")
         return redirect(url_for("home"))
+
+
+def register_wishlist_routes(app, db):
+    """Register wishlist-related routes."""
+
+    @app.route("/<username>")
+    def profile(username):
+        """
+        Profile page for a user displaying their wishlists.
+        """
+        user_wishlists = list(db.lists.find({"username": username}))
+        return render_template(
+            "profile.html", username=username, wishlists=user_wishlists
+        )
+
+    @app.route("/<username>/add_wishlist", methods=["GET", "POST"])
+    def add_wishlist(username):
+        """
+        Route to add a new wishlist for a user.
+        """
+        if session["username"] != username:
+            flash("Access denied. You cannot modify another user's wishlist.", "error")
+            return redirect(url_for("home"))
+
+        if request.method == "POST":
+            new_wishlist = {
+                "username": username,
+                "items": [],
+                "name": request.form["name"],
+                "public_id": str(uuid.uuid4()),  # Generate a unique public ID
+            }
+            db.lists.insert_one(new_wishlist)
+            return redirect(url_for("profile", username=username))
+
+        user_wishlists = list(db.lists.find({"username": username}))
+        return render_template(
+            "add-wishlist.html", username=username, wishlists=user_wishlists
+        )
+
+    @app.route("/wishlist/<wishlist_id>")
+    def wishlist_view(wishlist_id):
+        """
+        Route to display a specific wishlist with its items.
+        """
+        user_wishlist = db.lists.find_one({"_id": ObjectId(wishlist_id)})
+        items = list(db.items.find({"wishlist": ObjectId(wishlist_id)}))
+        return render_template("wishlist.html", wishlist=user_wishlist, items=items)
+
+    @app.route("/view/<public_id>")
+    def public_view(public_id):
+        """
+        Public view to show a shared wishlist.
+        """
+        wishlist = db.lists.find_one({"public_id": public_id})
+        if not wishlist:
+            return "Wishlist not found", 404
+        items = db.items.find({"wishlist": wishlist["_id"]})
+        return render_template("public_wishlist.html", wishlist=wishlist, items=items)
 
 
 APP = create_app()
