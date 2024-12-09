@@ -3,13 +3,13 @@ Flask API for managing wishlists.
 Handles routes for wishlist creation, retrieval, and updates.
 """
 
+from functools import wraps
 import os
 import uuid
 import pymongo
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, redirect, render_template, request, url_for
-
+from flask import Flask, redirect, render_template, request, url_for, session, flash
 
 load_dotenv()
 
@@ -19,13 +19,9 @@ def create_app():
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB limit
     app.secret_key = os.getenv("SECRET_KEY")
-
-    # Debugging: Print environment variables
-    print(f"MONGO_URI: {os.getenv('MONGO_URI')}")
-    # print(f"MONGO_DBNAME: {os.getenv('MONGO_DBNAME')}")
+    app.config["SESSION_TYPE"] = "filesystem"
 
     mongo_uri = os.getenv("MONGO_URI")
-
     mongo_dbname = "wishlist"
 
     if not mongo_uri:
@@ -36,6 +32,10 @@ def create_app():
     connection = pymongo.MongoClient(mongo_uri, tls=True)
     db = connection[mongo_dbname]
 
+    # indexing
+    db.users.create_index("username", unique=True)
+    db.lists.create_index("public_id")
+
     register_routes(app, db)
 
     return app
@@ -43,6 +43,16 @@ def create_app():
 
 def register_routes(app, db):
     """Register routes"""
+
+    def login_required(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if "username" not in session:
+                flash("Access denied. Please log in.", "error")
+                return redirect(url_for("login"))
+            return f(*args, **kwargs)
+
+        return decorated_function
 
     @app.route("/")
     def home():
@@ -68,6 +78,7 @@ def register_routes(app, db):
         )
 
     @app.route("/<username>/add_wishlist", methods=["GET", "POST"])
+    @login_required
     def add_wishlist(username):
         """
         Route to add a new wishlist for a user.
@@ -78,6 +89,10 @@ def register_routes(app, db):
         Returns:
             Redirects to the profile page after adding a wishlist or renders the add wishlist page.
         """
+        if session["username"] != username:
+            flash("Access denied. You cannot modify another user's wishlist.", "error")
+            return redirect(url_for("home"))
+
         if request.method == "POST":
             new_wishlist = {
                 "username": username,
@@ -87,6 +102,7 @@ def register_routes(app, db):
             }
             db.lists.insert_one(new_wishlist)
             return redirect(url_for("profile", username=username))
+
         user_wishlists = list(db.lists.find({"username": username}))
         return render_template(
             "add-wishlist.html", username=username, wishlists=user_wishlists
@@ -143,7 +159,19 @@ def register_routes(app, db):
             Redirects to the profile page after successful login or renders the login page.
         """
         if request.method == "POST":
-            return redirect(url_for("profile", username=request.form["username"]))
+            username = request.form["username"]
+            password = request.form["password"]
+
+            # Find user in the database
+            user = db.users.find_one({"username": username})
+            if not user or user["password"] != password:
+                flash("Invalid username or password.", "error")
+                return redirect(url_for("login"))
+
+            # Login success: store user in session
+            session["username"] = username
+            return redirect(url_for("profile", username=username))
+
         return render_template("login.html")
 
     @app.route("/signup", methods=["GET", "POST"])
@@ -155,13 +183,42 @@ def register_routes(app, db):
             Redirects to the profile page after successful signup or renders the signup page.
         """
         if request.method == "POST":
+            username = request.form["username"].strip()
+            password = request.form["password"].strip()
+
+            # Validation
+            if len(username) < 3 or len(password) < 6:
+                flash(
+                    "Username must be at least 3 characters and password at least 6 characters.",
+                    "error",
+                )
+                return redirect(url_for("signup"))
+
+            # Check if username already exists
+            if db.users.find_one({"username": username}):
+                flash(
+                    "Username already exists. Please choose a different one.", "error"
+                )
+                return redirect(url_for("signup"))
+
+            # Store user details in plain-text
             new_user = {
-                "username": request.form["username"],
-                "password": request.form["password"],
+                "username": username,
+                "password": password,
             }
             db.users.insert_one(new_user)
-            return redirect(url_for("profile", username=request.form["username"]))
+            flash("Signup successful! Please log in.", "success")
+            return redirect(url_for("login"))
         return render_template("signup.html")
+
+    @app.route("/logout")
+    def logout():
+        """
+        Route for user logout.
+        """
+        session.pop("username", None)
+        flash("You have been logged out.", "info")
+        return redirect(url_for("home"))
 
     @app.route("/view/<public_id>")
     def public_view(public_id):

@@ -111,6 +111,37 @@ button:hover {
     margin: 5px 0;
 }
 
+.error {
+    color: red;
+}
+.success {
+    color: green;
+}
+
+.flash-messages {
+    list-style: none;
+    padding: 0;
+}
+
+.flash-messages li {
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    color: white;
+}
+
+.flash-messages li.success {
+    background-color: #28a745;
+}
+
+.flash-messages li.error {
+    background-color: #dc3545;
+}
+
+.flash-messages li.info {
+    background-color: #17a2b8;
+}
+
 /* Footer */
 footer {
     text-align: center;
