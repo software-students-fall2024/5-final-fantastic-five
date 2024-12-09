@@ -144,6 +144,8 @@ button:hover {
 }
 
 .wishlist-grid {
+    position: relative;
+    overflow: visible; /* Prevent clipping by the grid container */
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
@@ -158,6 +160,7 @@ button:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 15px;
     transition: transform 0.2s;
+    overflow: visible;
 }
 
 .wishlist-item:hover {
@@ -226,7 +229,7 @@ button:hover {
     border: 1px solid #ddd;
     border-radius: 4px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    z-index: 999;
     text-align: left;
     padding: 10px;
 }

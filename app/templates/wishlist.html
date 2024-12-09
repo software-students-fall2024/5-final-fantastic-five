@@ -25,10 +25,10 @@
             </div>
             <div class="item-actions">
                 <div class="action-menu">
-                    <button class="dots-menu" data-menu-id="menu-{{ item['_id'] }}">&#x22EE;</button>
-                    <div class="dropdown-menu" id="menu-{{ item['_id'] }}">
-                        <a href="{{ url_for('edit_item', wishlist_id=wishlist['_id'], item_id=item['_id']) }}">Edit</a>
-                        <form action="{{ url_for('delete_item', wishlist_id=wishlist['_id'], item_id=item['_id']) }}" method="POST">
+                    <button class="dots-menu" data-menu-id="menu-{{ item._id | string }}" onclick="toggleMenu(event, this)">&#x22EE;</button>
+                    <div class="dropdown-menu" id="menu-{{ item._id | string }}">
+                        <a href="{{ url_for('edit_item', wishlist_id=wishlist._id, item_id=item._id) }}">Edit</a>
+                        <form action="{{ url_for('delete_item', wishlist_id=wishlist._id, item_id=item._id) }}" method="POST">
                             <button type="submit">Delete</button>
                         </form>
                     </div>
@@ -45,17 +45,25 @@
 </section>
 
 <script>
-    // Add click event listeners to toggle menu buttons
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.dots-menu').forEach(button => {
-            button.addEventListener('click', (event) => {
-                event.stopPropagation(); // Prevent triggering the parent div's click
-                const menuId = event.target.dataset.menuId;
-                const menu = document.getElementById(menuId);
-                if (menu) {
-                    menu.classList.toggle('show');
-                }
-            });
+    function redirectToUrl(element) {
+        const url = element.getAttribute('data-url');
+        window.location.href = url;
+    }
+
+    function toggleMenu(event, button) {
+        event.stopPropagation(); // Prevent parent div's click event
+        const menuId = button.getAttribute('data-menu-id');
+        const menu = document.getElementById(menuId);
+        
+        if (menu) {
+            menu.classList.toggle('show');
+        }
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.remove('show');
         });
     });
 
@@ -68,11 +76,6 @@
         }).catch(err => {
             console.error('Failed to copy link: ', err);
         });
-    }
-
-    function redirectToUrl(element) {
-        const url = element.getAttribute('data-url');
-        window.location.href = url;
     }
 </script>
 {% endblock %}
