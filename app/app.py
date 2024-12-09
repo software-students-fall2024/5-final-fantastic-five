@@ -187,19 +187,18 @@ def register_routes(app, db):
     def edit_item(wishlist_id, item_id):
         """
         Route to edit an item in a specific wishlist.
-
-        Args:
-            wishlist_id (str): ID of the wishlist.
-            item_id (str): ID of the item.
-
-        Returns:
-            Renders the edit item page or redirects to the wishlist view.
         """
         # Verify wishlist ownership
         wishlist = db.lists.find_one({"_id": ObjectId(wishlist_id)})
         if not wishlist or wishlist["username"] != session.get("username"):
             flash("Access denied. You cannot edit items in this wishlist.", "error")
             return redirect(url_for("home"))
+
+        # Fetch the existing item details
+        item = db.items.find_one({"_id": ObjectId(item_id)})
+        if not item:
+            flash("Item not found.", "error")
+            return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
 
         if request.method == "POST":
             updated_data = {
@@ -217,18 +216,12 @@ def register_routes(app, db):
                 photo.save(photo_path)
                 updated_data["photo_url"] = f"/{photo_path}"
             else:
-                # Use default image if no photo is uploaded
-                updated_data.setdefault("photo_url", "/static/uploads/default.png")
+                # Retain the current photo_url if no new photo is uploaded
+                updated_data["photo_url"] = item.get("photo_url", "/static/uploads/default.png")
 
             # Update the item in the database
             db.items.update_one({"_id": ObjectId(item_id)}, {"$set": updated_data})
             flash("Item updated successfully!", "success")
-            return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
-
-        # Fetch the existing item details for editing
-        item = db.items.find_one({"_id": ObjectId(item_id)})
-        if not item:
-            flash("Item not found.", "error")
             return redirect(url_for("wishlist_view", wishlist_id=wishlist_id))
 
         return render_template("edit-item.html", item=item, wishlist_id=wishlist_id)
