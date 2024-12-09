@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}PlantifyAI{% endblock %}</title>
+        <title>{% block title %}Wishlist{% endblock %}</title>
         
         <!-- Font Awesome for icons -->
         <link
@@ -18,9 +18,18 @@
     
     <body>
         <div class="nav">
-            <a href="{{ url_for('home') }}" >
+            <a href="{{ url_for('home') }}">
                 <h1>Wishlist</h1>
             </a>
+            <div class="nav-links">
+                {% if session['username'] %}
+                    <a href="{{ url_for('profile', username=session['username']) }}">Profile</a>
+                    <a href="{{ url_for('logout') }}">Log Out</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Log In</a>
+                    <a href="{{ url_for('signup') }}">Sign Up</a>
+                {% endif %}
+            </div>
         </div>
         <main>   
             {% block content %}

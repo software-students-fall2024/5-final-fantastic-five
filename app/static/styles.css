@@ -21,6 +21,38 @@ h2, h3 {
     margin-bottom: 20px;
 }
 
+
+/* Navigation styles */
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+}
+
+.nav a, .nav button {
+    color: white;
+    text-decoration: none;
+    margin-right: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.nav button {
+    font-size: 16px;
+}
+
+.nav-links a {
+    margin-left: 10px;
+}
+
+.nav a:hover, .nav button:hover {
+    text-decoration: underline;
+}
+
 /* Header */
 header {
     background-color: #007BFF;
@@ -90,6 +122,20 @@ button:hover {
     background-color: #0056b3;
 }
 
+.back-button {
+    padding: 8px 12px; /* Adds space inside the button */
+    border: none; /* Optional: Remove border if not needed */
+    border-radius: 4px;
+    background-color: #f0f0f0; /* Optional: Add a background color */
+    color: #333; /* Optional: Button text color */
+    cursor: pointer; /* Show pointer cursor on hover */
+}
+
+.back-button:hover {
+    background-color: #e0e0e0; /* Optional: Slightly darker background on hover */
+}
+
+
 /* Wishlist and Item Display */
 .wishlist, .items {
     max-width: 800px;
@@ -142,6 +188,9 @@ button:hover {
     background-color: #17a2b8;
 }
 
+main {
+    margin: 3%
+}
 /* Footer */
 footer {
     text-align: center;
