@@ -60,7 +60,7 @@ def test_login(client):  # pylint: disable=redefined-outer-name
 
 def test_login_post(client):  # pylint: disable=redefined-outer-name
     """Test the POST method for user login."""
-    response = client.post("/login", data={"username": "test_user"})
+    response = client.post("/login", data={"username": "test_user", "password": "test_pass"})
     assert response.status_code == 302  # Redirects after successful login
     assert response.headers["Location"] == "/test_user"
 
