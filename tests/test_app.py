@@ -3,6 +3,7 @@ Extended test suite for the Flask application using MagicMock.
 """
 
 import os
+from dotenv import load_dotenv
 from unittest.mock import MagicMock, patch
 from bson import ObjectId
 import pytest
@@ -17,7 +18,7 @@ def app_fixture():
     with patch.dict(
         os.environ,
         {
-            "MONGO_URI": "mongodb://localhost:27017/wishlist_db",
+            "MONGO_URI": os.getenv("MONGO_URI"),
             "MONGO_DBNAME": "wishlist",
         },
     ):
