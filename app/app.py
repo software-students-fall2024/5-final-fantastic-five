@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, url_for
 
 
-load_dotenv() 
+load_dotenv()
 
 
 def create_app():
