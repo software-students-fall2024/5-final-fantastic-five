@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}Edit Item{% endblock %}
+
+{% block content %}
+<section>
+    <h3>Edit Item</h3>
+    <form action="{{ url_for('edit_item', wishlist_id=wishlist_id, item_id=item['_id']) }}" method="POST" enctype="multipart/form-data">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="{{ item.name }}" required>
+    
+        <label for="price">Price:</label>
+        <input type="text" id="price" name="price" value="{{ item.price }}" required>
+    
+        <label for="link">Link:</label>
+        <input type="url" id="link" name="link" value="{{ item.link }}">
+    
+        <label for="notes">Notes (optional):</label>
+        <textarea id="notes" name="notes">{{ item.notes }}</textarea>
+    
+        <label for="photo">Photo (optional):</label>
+        <input type="file" id="photo" name="photo" accept="image/*">
+        {% if item.photo_url %}
+            <p>Current Photo:</p>
+            <img src="{{ item.photo_url }}" alt="Item Photo" style="max-width: 150px;">
+        {% endif %}
+    
+        <button type="submit">Save</button>
+    </form>
+    
+</section>
+{% endblock %}
