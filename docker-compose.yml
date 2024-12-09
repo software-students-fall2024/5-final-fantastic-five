@@ -1,16 +1,16 @@
-version: '3.8'
-
 services:
   flask-api:
     build:
       context: ./app
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
     env_file:
       - .env
+    ports:
+      - "3000:3000"
     depends_on:
       - mongodb
+    networks:
+      - app-network
 
   mongodb:
     image: mongo:latest
@@ -19,6 +19,8 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    networks:
+      - app-network
 
   db-seeder:
     build:
@@ -28,7 +30,13 @@ services:
       - mongodb
     env_file:
       - .env
+    networks:
+      - app-network
     command: ["python3", "/seed.py"]
 
 volumes:
   mongo_data:
+
+networks:
+  app-network:
+    driver: bridge
