@@ -25,7 +25,6 @@ def create_app():
 
     mongo_uri = os.getenv("MONGO_URI")
 
-    
     mongo_dbname = "wishlist"
 
     if not mongo_uri:
@@ -49,10 +48,7 @@ def register_routes(app, db):
         """
         Home route that renders the homepage.
         """
-        try:
-            return render_template("home.html")
-        except Exception as e:
-            return f"Error loading homepage: {e}", 500
+        return render_template("home.html")
 
     @app.route("/<username>")
     def profile(username):
@@ -182,7 +178,8 @@ def register_routes(app, db):
         db.items.update_one({"_id": ObjectId(item_id)}, {"$set": {"purchased": True}})
         return "Item marked as purchased", 200
 
+
 APP = create_app()
 if __name__ == "__main__":
-    #APP.run(host="0.0.0.0", port=3000)
-    APP.run(debug=False, host="0.0.0.0", port=int(os.getenv("PORT", 3000)))
+    # APP.run(host="0.0.0.0", port=3000)
+    APP.run(debug=False, host="0.0.0.0", port=int(os.getenv("PORT", "3000")))
